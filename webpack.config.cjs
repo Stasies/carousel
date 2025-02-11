@@ -29,6 +29,6 @@ module.exports = {
     static: path.resolve(__dirname, "src"), // Serve files from the src directory
     hot: true, // Enable hot reloading
     open: true, // Auto-open browser
-    port: 3000, // Port to run the server
+    port: 3001, // Port to run the server
   },
 };

@@ -11,24 +11,16 @@ export class Slide extends LitElement {
       box-sizing: border-box;
     }
   `;
-  connectedCallback() {
-    super.connectedCallback();
-
-    // Traverse up the DOM to find the parent Carousel
-    const carousel = this.parentElement?.closest(
-      "carousel-component"
-    ) as Carousel;
-    if (carousel) {
-      console.log("Found carousel:", carousel);
-      // Now you can call methods on the carousel
-    } else {
-      console.error("Carousel not found!");
-    }
+  @property({ type: String }) currentIndex = '';
+  constructor() {
+    super()
   }
+
 
   render() {
     return html`
       <div class="slide">
+      ${this.currentIndex}
         <slot></slot>
       </div>
     `;
