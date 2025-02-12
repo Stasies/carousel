@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { Carousel } from "./carousel";
 
 @customElement("slide-component")
 export class Slide extends LitElement {
@@ -11,16 +10,13 @@ export class Slide extends LitElement {
       box-sizing: border-box;
     }
   `;
-  @property({ type: String }) currentIndex = '';
+  @property({ type: String }) status = "";
   constructor() {
     super()
   }
-
-
   render() {
     return html`
-      <div class="slide">
-      ${this.currentIndex}
+      <div class="slide ${this.status ? 'carousel-slide_' + this.status : ''}">
         <slot></slot>
       </div>
     `;
