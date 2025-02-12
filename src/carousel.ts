@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { DraggableMixin } from "./dragging";
 type config = {
   slidesToShow: number;
   slidesToScroll: number;
@@ -41,7 +40,8 @@ export class Carousel extends LitElement {
     }
   `;
 
-  @property({ type: Number, reflect: true }) currentIndex = 1;
+  @property({ type: Number, reflect: true }) _currentIndex = 1;
+  @property({ type: Number }) maxIndex = 1;
   @property({ type: Array<Element> }) slides: Element[] | null = null;
   @property({ type: Number }) slideWidth = 0;
   @property({ type: Number }) slidesToShow = 1.5;
@@ -56,21 +56,21 @@ export class Carousel extends LitElement {
     super();
     this.slideWidth = 100;
     this.wrapAround = false
-    this.autoplay = false;
+    this.autoplay = 2000;
     this.interval = null;
     this.breakpoints = config?.breakpoints || {
-      1200: {
-        itemsToShow: 3,
-        itemsToScroll: 3
-      },
-      482: {
-        itemsToShow: 2,
-        itemsToScroll: 2
-      },
       0: {
         itemsToShow: 1,
+        itemsToScroll: 1
       },
     };
+  }
+  get currentIndex() {
+    return this._currentIndex
+  }
+  set currentIndex(value: number) {
+    this._currentIndex = Math.min(Math.max(value, 0), this.maxIndex);
+    this.#updateSlideClasses()
   }
   startAutoPlay() {
     if (this.autoplay && typeof this.autoplay == 'number') {
@@ -112,8 +112,9 @@ export class Carousel extends LitElement {
     this.#updateResponsiveSettings(slot);
 
     this.currentIndex = this.wrapAround ? Math.floor(this.slidesToShow) : 0;
-
     this.slideCount = assignedSlides.length;
+    this.maxIndex = this.wrapAround ? this.slideCount : Math.max(this.slideCount - this.slidesToShow, 0);
+
   }
   #onDragStart(e: MouseEvent | TouchEvent) {
     this.stopAutoPlay()
@@ -126,6 +127,9 @@ export class Carousel extends LitElement {
     if (!this.isDragging) return;
     const currentX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
     this.dragOffset = currentX - this.startX;
+    if (this.currentIndex >= this.maxIndex && this.dragOffset < 0 || this.currentIndex <= 0 && this.dragOffset > 0) {
+      this.dragOffset = 0
+    }
     const track = this.shadowRoot?.querySelector(".carousel-track") as HTMLElement;
     if (track) {
       track.style.transform = `translateX(calc(-${this.currentIndex * this.slideWidth}% + ${this.dragOffset}px))`;
@@ -139,11 +143,10 @@ export class Carousel extends LitElement {
     if (Math.abs(this.dragOffset) > threshold) {
       if (this.dragOffset < 0) {
         this.next()
-      } else {
+      } else if (this.currentIndex > 0) {
         this.prev()
       }
     }
-    this.#updateResponsiveSettings()
   }
   #setUpAutoplay() {
     if (!this.autoplay) return
@@ -156,6 +159,24 @@ export class Carousel extends LitElement {
     const firstClones = assignedSlides.slice(0, Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
     const lastClones = assignedSlides.slice(-Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
     this.slides = this.wrapAround ? [...lastClones, ...assignedSlides, ...firstClones] : assignedSlides;
+    this.#updateSlideClasses();
+
+  }
+  #updateSlideClasses() {
+    this.slides?.forEach((slide, index) => {
+      if (!(slide instanceof HTMLElement)) return;
+
+      let status = "";
+      if (index === this.currentIndex) {
+        status = "current";
+      } else if (index === this.currentIndex - 1) {
+        status = "prev";
+      } else if (index === this.currentIndex + 1) {
+        status = "next";
+      }
+
+      slide.setAttribute("status", status);
+    });
   }
   #updateResponsiveSettings(slot?: HTMLSlotElement) {
     for (let point in this.breakpoints) {
@@ -181,7 +202,7 @@ export class Carousel extends LitElement {
   }
   prev() {
     if (!this.wrapAround) {
-      this.handleNonInfiniteScroll(-this.slidesToScroll)
+      this.#handleNonInfiniteScroll(-this.slidesToShow)
       return
     }
     const maxLeftScroll = this.slidesToShow
@@ -195,33 +216,27 @@ export class Carousel extends LitElement {
   }
   next() {
     if (!this.wrapAround) {
-      this.handleNonInfiniteScroll(this.slidesToScroll)
+      this.#handleNonInfiniteScroll(this.slidesToShow)
       return
     }
     const maxRightScroll = this.slideCount - this.slidesToScroll
     if (this.currentIndex >= maxRightScroll) {
       this.currentIndex += this.slidesToScroll;
       this.#resetScroll(this.currentIndex - this.slideCount)
-
     } else {
       this.currentIndex += this.slidesToScroll;
     }
     this.requestUpdate();
   }
-  handleNonInfiniteScroll(step: number) {
-    let maxEl = this.slideCount - this.currentIndex - step * 2
-    step = step > maxEl ? maxEl : step
-    console.log(maxEl)
-    if (this.currentIndex + step >= 0 && this.currentIndex + step < this.slideCount) {
-      this.currentIndex += step
-    }
-    // console.log(this.slideCount)
-    // console.log(this.currentIndex)
+  #handleNonInfiniteScroll(step: number) {
+    this.currentIndex += step
+    this.requestUpdate()
   }
   jump(index: number) {
     this.currentIndex = index + Math.floor(this.slidesToShow)
     this.requestUpdate()
   }
+
 
   render() {
     return html`
