@@ -1,6 +1,6 @@
-# 🚀 Lit Carousel Component
+# 🚀 JS-Carousel Component
 
-A lightweight, customizable, and performant **carousel**. Supports dragging functionality via `translateX`.
+A lightweight, customizable, and performant **js-carousel**. Supports dragging functionality via `translateX`.
 
 ## ✨ Features
 

@@ -1,5 +1,11 @@
 {
+  "name": "js-carousel",
+  "version": "1.0.0",
+  "description": "A lightweight js-carousel component",
+  "files": ["dist"],
+  "main": "dist/index.js",
   "type": "module",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -9,23 +15,17 @@
   "dependencies": {
     "@open-wc/testing": "^4.0.0",
     "lit": "^3.2.1",
-    "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "vite": "^6.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.8",
-    "@babel/preset-env": "^7.26.8",
-    "@babel/preset-typescript": "^7.26.0",
     "@testing-library/dom": "^10.4.0",
-    "babel-jest": "^29.7.0",
-    "babel-loader": "^9.2.1",
     "happy-dom": "^17.1.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5",
-    "webpack": "^5.97.1",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.0"
-  }
+    "vitest": "^3.0.5"
+  },
+   "keywords": ["carousel", "js", "web components"],
+    "author": "Anastasia Vyatkina",
+    "license": "MIT"
 }
