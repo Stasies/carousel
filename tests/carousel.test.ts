@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { elementUpdated, fixture, fixtureSync } from '@open-wc/testing';
 import { html } from 'lit';
-import '../src/experiment'
-import { CarouselComponent } from '../src/experiment';
+import '../src/carousel'
+import { CarouselComponent } from '../src/carousel';
 
 let el: CarouselComponent
 
