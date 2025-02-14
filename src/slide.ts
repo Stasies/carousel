@@ -1,30 +1,23 @@
-import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
-
-@customElement("slide-component")
-export class Slide extends LitElement {
-  static styles = css`
-    :host {
-      height: 100%;
-      flex: 0 0 auto;
-      box-sizing: border-box;
-    }
-  `;
-  @property({ type: String }) status = "";
+export class SlideComponent extends HTMLElement {
+  rendered: boolean
   constructor() {
     super()
+    this.rendered = false
+  }
+  connectedCallback() {
+    this.render()
   }
   render() {
-    return html`
-      <div class="slide ${this.status ? 'carousel-slide_' + this.status : ''}">
-        <slot></slot>
-      </div>
-    `;
-  }
-}
+    if (this.rendered) return
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("slide");
 
-declare global {
-  interface HTMLElementTagNameMap {
-    "slide-component": Slide;
+    let children = Array.from(this.childNodes)
+    children.forEach((slide) => {
+      wrapper.appendChild(slide.cloneNode(true))
+    })
+
+    this.replaceWith(wrapper)
+    this.rendered = true
   }
 }
