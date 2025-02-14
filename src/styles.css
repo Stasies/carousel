@@ -1,0 +1,27 @@
+ .carousel {
+   border: 1px solid grey;
+   overflow: hidden;
+   display: flex;
+   height: 400px;
+ }
+
+ .carousel-track {
+   display: flex;
+   align-items: center;
+   width: 100%;
+   height: 100%;
+   user-select: none;
+ }
+
+ .transition {
+   transition: transform 0.3s ease;
+ }
+ .next{
+  color: red;
+ }
+
+ .slide{
+    height: 100%;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+ }
