@@ -1,12 +1,10 @@
+import "./styles.css";
 export declare class CarouselComponent extends HTMLElement {
     #private;
     slides: Element[] | null;
     config: any;
     _currentIndex: number;
     maxIndex: number;
-    breakpoints?: {
-        [key: number]: any;
-    };
     slidesToShow: number;
     slideCount: number;
     slidesToScroll: number;

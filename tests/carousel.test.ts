@@ -74,7 +74,7 @@ describe('my-thing', async () => {
 
   it('should handle invalid parameters', async () => {
     el = await fixture<CarouselComponent>(html`
-      <carousel-component autoplay="invalidAutoplay" breakpoints="invalidBreakpoints" wrapAround="invalidWrapAround">
+      <carousel-component autoplay="invalidAutoplay" wraparound="invalidWrapAround">
       <div class="slide"></div>
       <div class="slide"></div>
       <div class="slide"></div>
@@ -85,14 +85,54 @@ describe('my-thing', async () => {
     let slide = el.querySelector('.slide')
 
     if (slide) {
+      console.log("INNERHTML", track?.innerHTML)
       expect(window.getComputedStyle(slide).width).toBe('100%')
       expect(track?.children.length).toBe(3)
     }
   })
 
-  it('should append new slides when wrapAround is true', async () => {
+  it('should update styles for valid breakpoints', async () => {
+    el = fixtureSync<CarouselComponent>(html`
+      <carousel-component>
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+      </carousel-component>
+    `);
+    el.breakpoints = {
+      0: {
+        slidesToShow: 3,
+        slidesToScroll: 2
+      }
+    };
+
+    // Wait for updates
+    await elementUpdated(el);
+
+
+
+    let track = el.querySelector('.carousel-track')
+    let slide = el.querySelector('.slide')
+
+    if (slide) {
+      expect(window.getComputedStyle(slide).width).toMatch('33')
+      expect(track?.children.length).toBe(3)
+    }
+
+    el.breakpoints = {
+      0: {
+        slidesToShow: 2,
+        slidesToScroll: 2
+      }
+    };
+    await elementUpdated(el);
+    console.log(track?.outerHTML)
+
+  })
+
+  it('should append new slides when wraparound is true', async () => {
     el = await fixture<CarouselComponent>(html`
-      <carousel-component wrapAround="${true}">
+      <carousel-component wraparound="${true}">
       <div class="slide">1</div>
       <div class="slide">2</div>
       <div class="slide">3</div>

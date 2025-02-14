@@ -1,11 +1,16 @@
+import "./styles.css"
 import { SlideComponent } from "./slide"
-import { ConfigValidator } from "./validator"
+import { ConfigValidator, isInvalidBreakpoints } from "./validator"
 export class CarouselComponent extends HTMLElement {
+  private observer: MutationObserver | null = null;
   slides: Element[] | null
+  rendered: boolean
   config: any
+  autoplay: false | number
+  wraparound: boolean
   _currentIndex: number
+  _breakpoints: Record<number, { slidesToShow: number; slidesToScroll: number }>
   maxIndex: number
-  breakpoints?: { [key: number]: any }
   slidesToShow: number
   slideCount: number
   slidesToScroll: number
@@ -17,13 +22,10 @@ export class CarouselComponent extends HTMLElement {
 
   constructor(...config: any) {
     super();
-    this.breakpoints = {
-      0: {
-        itemsToShow: 1,
-        itemsToScroll: 1
-      },
-    }
-    this.config = new Proxy(this.attributes, ConfigValidator);
+    this.rendered = false
+    this._breakpoints = {}
+    this.autoplay = false
+    this.wraparound = false
     this.slides = []
     this.interval = null
     this.slideWidth = 100
@@ -36,12 +38,64 @@ export class CarouselComponent extends HTMLElement {
     this.startX = 0
     this.dragOffset = 0
   }
-  static get observedAttributes() {
-    return ['autoplay', 'wrapAround', 'breakpoints'];
+  #setupStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
+    .carousel {
+      border: 1px solid grey;
+      overflow: hidden;
+      display: flex;
+      height: 400px;
+    }
+    .carousel-track {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      user-select: none;
+    }
+    .transition {
+      transition: transform 0.3s ease;
+    }
+    .slide{
+      height: 100%;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+    }
+    `;
+    document.head.appendChild(style);
   }
-  // attributeChangedCallback() {
-  //   console.log('changes')
-  // }
+
+  static get observedAttributes() {
+    return ['autoplay', 'wraparound', 'breakpoints'];
+  }
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
+    switch (name) {
+      case 'autoplay':
+        this.autoplay = parseInt(newValue, 10) || false;
+        this.startAutoPlay()
+        break;
+      case 'wraparound':
+        this.wraparound = newValue.match(/true|false/) ? JSON.parse(newValue) : false;
+        break;
+    }
+  }
+  set breakpoints(value: Record<number, { slidesToShow: number; slidesToScroll: number }>) {
+    if (!isInvalidBreakpoints(value)) {
+      this._breakpoints = value;
+    }
+    this.updateBreakpoints();
+  }
+
+  get breakpoints() {
+    return this._breakpoints;
+  }
+
+  updateBreakpoints() {
+    this.#setResponsiveDisplayOptions()
+    this.#updateResponsiveSettings()
+  }
   get currentIndex() {
     return this._currentIndex
   }
@@ -50,20 +104,24 @@ export class CarouselComponent extends HTMLElement {
     this.#handleTranslate()
     this.#updateSlideClasses()
   }
-  connectedCallback() {
-    this.#setResponsiveDisplayOptions()
+  #initializeCarousel() {
     this.#setupSlides()
     this.render();
-    this.#setupEventListeners();
     this.#updateResponsiveSettings();
     this.#setupIndex()
   }
+  connectedCallback() {
+    this.#setupStyles()
+    this.observeSlides();
+    this.#initializeCarousel()
+    this.#setResponsiveDisplayOptions() //amount of slides visible & scolled
+    this.#setupEventListeners();
+  }
   disconnectedCallback() {
-    this.#removeEventListeners
+    this.#removeEventListeners()
   }
   render() {
     if (this.querySelector(".carousel")) return;
-    this.config = new Proxy(this.attributes, ConfigValidator);
 
     this.innerHTML = ""
 
@@ -78,31 +136,39 @@ export class CarouselComponent extends HTMLElement {
     this.appendChild(wrapper)
   }
   #setupSlides() {
-    const initialSlides = Array.from(this.children);
+    const track = this.querySelector('.carousel-track')
+    let initialSlides = Array.from(track ? track.children : this.children);
     this.slideCount = initialSlides.length
 
     const firstClones = initialSlides.slice(0, Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
     const lastClones = initialSlides.slice(-Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
 
-    this.slides = this.config.wrapAround ? [...lastClones, ...initialSlides, ...firstClones] : initialSlides;
+    this.slides = this.wraparound ? [...lastClones, ...initialSlides, ...firstClones] : initialSlides;
+  }
+  observeSlides() {
+    this.observer = new MutationObserver(() => this.#initializeCarousel());
+    this.observer.observe(this, { childList: true, subtree: true });
   }
   #setResponsiveDisplayOptions() {
+    console.log(this.breakpoints)
     for (let point in this.breakpoints) {
       if (window.innerWidth >= +point) {
-        this.slidesToShow = this.breakpoints[+point].itemsToShow || 1;
-        this.slidesToScroll = this.breakpoints[+point].itemsToScroll || this.breakpoints[+point].itemsToShow || 1;
+        this.slidesToShow = this.breakpoints[+point].slidesToShow || 1;
+        this.slidesToScroll = this.breakpoints[+point].slidesToScroll || this.breakpoints[+point].slidesToShow || 1;
       }
     }
   }
   #updateResponsiveSettings() {
+    console.log(this.slidesToShow)
     this.slideWidth = 100 / this.slidesToShow;
+    console.log("WIDTH", this.slideWidth)
     this.slides?.forEach((slide) => {
       (slide as any).setAttribute("style", `width: ${this.slideWidth}%`);
     });
   }
   #setupIndex() {
-    this.maxIndex = this.config.wrapAround ? this.slideCount : Math.max(this.slideCount - this.slidesToShow, 0);
-    this.currentIndex = this.config.wrapAround ? Math.floor(this.slidesToShow) : 0;
+    this.maxIndex = this.wraparound ? this.slideCount : Math.max(this.slideCount - this.slidesToShow, 0);
+    this.currentIndex = this.wraparound ? Math.floor(this.slidesToShow) : 0;
   }
   #setupEventListeners() {
     this.addEventListener("mousedown", this.#onDragStart);
@@ -112,8 +178,8 @@ export class CarouselComponent extends HTMLElement {
     this.addEventListener("mouseup", this.#onDragEnd);
     this.addEventListener("mouseleave", this.#onDragEnd);
     this.addEventListener("touchend", this.#onDragEnd);
+    window.addEventListener("resize", () => this.updateBreakpoints());
 
-    if (!this.config.autoplay) return
     this.startAutoPlay()
     this.addEventListener("mouseenter", () => this.stopAutoPlay());
     this.addEventListener("mouseleave", () => this.startAutoPlay());
@@ -160,8 +226,8 @@ export class CarouselComponent extends HTMLElement {
     }
   }
   startAutoPlay() {
-    if (this.config.autoplay) {
-      this.interval = setInterval(() => this.next(), this.config.autoplay);
+    if (this.autoplay) {
+      this.interval = setInterval(() => this.next(), this.autoplay);
     }
   }
   stopAutoPlay() {
@@ -181,7 +247,8 @@ export class CarouselComponent extends HTMLElement {
         slide.classList.add("prev")
       } else if (index === this.currentIndex + 1) {
         slide.classList.add("next")
-      } else if (index < this.currentIndex - 1 || index > this.currentIndex + this.slidesToShow) {
+      }
+      if (index < this.currentIndex - 1 || index > this.currentIndex + this.slidesToShow) {
         slide.classList.add('hidden')
       }
     });
@@ -203,7 +270,7 @@ export class CarouselComponent extends HTMLElement {
     }, 300);
   }
   prev() {
-    if (!this.config.wrapAround) {
+    if (!this.wraparound) {
       this.handleNonInfiniteScroll(-this.slidesToShow)
       return
     }
@@ -216,7 +283,7 @@ export class CarouselComponent extends HTMLElement {
     }
   }
   next() {
-    if (!this.config.wrapAround) {
+    if (!this.wraparound) {
       this.handleNonInfiniteScroll(this.slidesToShow)
       return
     }

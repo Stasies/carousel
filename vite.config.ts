@@ -10,10 +10,16 @@ export default defineConfig({
     environment: 'happy-dom',
   },
   build: {
+    emptyOutDir: false,
     lib: {
-      entry: 'src/carousel.js',  // or your entry point
+      entry: 'src/carousel.ts',  // or your entry point
       name: 'carousel',  // Global variable name for UMD or IIFE builds
       fileName: (format) => `carousel.${format}.js`
     },
+    rollupOptions: {
+      output: {
+        assetFileNames: "carousel.[ext]"
+      }
+    }
   },
 });

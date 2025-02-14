@@ -1,11 +1,15 @@
-function isInvalidBreakpoints(obj: any): string | boolean {
+export function isInvalidBreakpoints(obj: any): string | boolean {
+  console.log('checking')
+  console.log(typeof obj)
   if (typeof obj !== 'object' || obj === null) {
+    console.log('1')
     return `invalid value type. Breakpoints should be an object`;
   }
 
   for (const key in obj) {
     // Check if the key is a number
     if (isNaN(Number(key))) {
+      console.log('2')
       return `Breakpoints should contain keys typeof number`;
     }
 
@@ -14,12 +18,14 @@ function isInvalidBreakpoints(obj: any): string | boolean {
     if (
       typeof value !== 'object' ||
       value === null ||
-      (value.itemsToShow && typeof value.itemsToShow !== 'number') ||
-      (value.itemsToScroll && typeof value.itemsToScroll !== 'number')
+      (value.slidesToShow && typeof value.slidesToShow !== 'number') ||
+      (value.slidesToScroll && typeof value.slidesToScroll !== 'number')
     ) {
+      console.log('3')
       return `invalid value type. Pass an object with keys itemsToShow and itemsToScroll and values typeof number`;
     }
   }
+  console.log('4')
 
   return false;
 }
@@ -34,25 +40,11 @@ export const ConfigValidator = {
         return +target[prop]?.value
       }
     }
-    if (prop == 'breakpoints') {
-      let error = isInvalidBreakpoints(target[prop])
-      if (error) {
-        console.warn(`Error in ${prop}. ${error}`)
-        return {
-          0: {
-            itemsToShow: 1,
-            itemsToScroll: 1
-          },
-        }
-      } else {
-        return target[prop]
-      }
-    }
-    if (prop == 'wrapAround') {
+    if (prop == 'wraparound') {
       if (!!String(target[prop].value).match(/true|false/)) {
         return target[prop]
       } else {
-        console.warn(`invalid wrapAround value type. Expected boolean. Set to default value.`)
+        console.warn(`invalid wraparound value type. Expected boolean. Set to default value.`)
         return false
       }
     }

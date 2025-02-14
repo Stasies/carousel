@@ -6,12 +6,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
         <script type="module" src="./src/carousel.ts"></script>
+        <script type="module" src="./src/testing.ts"></script>
         <script type="module" src="./src/slide.ts"></script>
         <link rel="stylesheet" href="./src/styles.css">
     </head>
 
     <body>
-        <carousel-component id="carousel" autoplay="false">
+        <carousel-component id="carousel" autoplay="false" wraparound="true">
             <slide-component>
                 <div class="big">1</div>
                 <div>2</div>
