@@ -1,16 +1,18 @@
 {
-  "name": "js-carousel",
-  "version": "1.0.0",
+  "name": "@stasies/js-carousel",
+  "version": "1.0.1",
   "description": "A lightweight js-carousel component",
   "files": ["dist"],
-  "main": "dist/index.js",
+  "main": "dist/carousel.umd.js",
+  "module": "dist/carousel.es.js",
   "type": "module",
-  "types": "dist/index.d.ts",
+  "types": "dist/carousel.d.ts",
   "scripts": {
     "start": "vite",
     "build": "vite build",
     "test": "vitest --watch",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@open-wc/testing": "^4.0.0",

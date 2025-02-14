@@ -9,4 +9,11 @@ export default defineConfig({
     // environment: 'jsdom',
     environment: 'happy-dom',
   },
+  build: {
+    lib: {
+      entry: 'src/carousel.js',  // or your entry point
+      name: 'carousel',  // Global variable name for UMD or IIFE builds
+      fileName: (format) => `carousel.${format}.js`
+    },
+  },
 });
