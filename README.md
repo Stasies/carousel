@@ -13,7 +13,7 @@ A lightweight, customizable, and performant **js-carousel**. Supports dragging f
 ## 📦 Installation
 
 ```sh
-npm install my-lit-carousel
+npm install @stasies/js-carousel
 ```
 
 ## 🚀 Usage
@@ -21,7 +21,7 @@ npm install my-lit-carousel
 ### Basic Example
 
 ```html
-<carousel-component autoplay="false" wraparound="true">
+<carousel-component autoplay="3000" wraparound="true">
   <slide-component>Slide 1</slide-component>
   <slide-component>Slide 2</slide-component>
   <slide-component>Slide 3</slide-component>
