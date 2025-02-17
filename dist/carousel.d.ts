@@ -1,8 +1,8 @@
 import "./styles.css";
 export declare class CarouselComponent extends HTMLElement {
     #private;
-    private observer;
     slides: Element[] | null;
+    gap: number;
     initialSlides: Element[];
     rendered: boolean;
     autoplay: false | number;
@@ -12,6 +12,7 @@ export declare class CarouselComponent extends HTMLElement {
         slidesToShow: number;
         slidesToScroll: number;
     }>;
+    private observer;
     private maxIndex;
     private slidesToShow;
     private slideCount;
@@ -45,4 +46,9 @@ export declare class CarouselComponent extends HTMLElement {
     prev(): void;
     next(): void;
     jump(index: number): void;
+}
+declare global {
+    interface HTMLElementTagNameMap {
+        "carousel-component": CarouselComponent;
+    }
 }

@@ -2,14 +2,15 @@ import "./styles.css";
 import { SlideComponent } from "./slide";
 import { isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
-    observer = null;
     slides;
+    gap;
     initialSlides;
     rendered;
     autoplay;
     wraparound;
     _currentIndex;
     _breakpoints;
+    observer = null;
     maxIndex;
     slidesToShow;
     slideCount;
@@ -28,6 +29,7 @@ export class CarouselComponent extends HTMLElement {
         this.wraparound = false;
         this.slides = [];
         this.interval = null;
+        this.gap = 0;
         this.slideWidth = 100;
         this.slideCount = 0;
         this._currentIndex = 0;
@@ -65,10 +67,9 @@ export class CarouselComponent extends HTMLElement {
         document.head.appendChild(style);
     }
     static get observedAttributes() {
-        return ["autoplay", "wraparound", "breakpoints"];
+        return ["autoplay", "wraparound", "breakpoints", "gap"];
     }
     attributeChangedCallback(name, oldValue, newValue) {
-        console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
         switch (name) {
             case "autoplay":
                 this.autoplay = parseInt(newValue, 10) || false;
@@ -101,10 +102,8 @@ export class CarouselComponent extends HTMLElement {
         this._currentIndex = Math.min(Math.max(value, 0), this.maxIndex);
         this.#handleTranslate();
         this.#updateSlideClasses();
-        console.log(this.currentIndex);
     }
     #initializeCarousel() {
-        console.log("initialising");
         this.#setupSlides();
         this.render();
         this.#updateResponsiveSettings();
@@ -135,7 +134,6 @@ export class CarouselComponent extends HTMLElement {
         if (!track) {
             this.initialSlides = Array.from(this.children);
         }
-        console.log(this.initialSlides);
         this.slideCount = this.initialSlides.length;
         const firstClones = this.initialSlides
             .slice(0, Math.floor(this.slidesToShow))

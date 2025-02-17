@@ -341,5 +341,17 @@ export class CarouselComponent extends HTMLElement {
   }
 }
 
-customElements.define("carousel-component", CarouselComponent);
-customElements.define("slide-component", SlideComponent);
+declare global {
+  interface HTMLElementTagNameMap {
+    "carousel-component": CarouselComponent;
+    "slide-component": SlideComponent;
+  }
+}
+// customElements.define("carousel-component", CarouselComponent);
+
+(function registerWebComponent() {
+  if (!customElements.get("carousel-component")) {
+    customElements.define("carousel-component", CarouselComponent);
+    customElements.define("slide-component", SlideComponent);
+  }
+})();
