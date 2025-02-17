@@ -3,8 +3,7 @@
   "version": "1.0.8",
   "description": "A lightweight js-carousel component",
   "files": [
-    "dist",
-    "dist/js-carousel.css"
+    "dist"
   ],
   "main": "dist/carousel.umd.js",
   "module": "dist/carousel.es.js",
