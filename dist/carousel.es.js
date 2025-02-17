@@ -1,35 +1,35 @@
 var E = Object.defineProperty;
-var v = (r) => {
-  throw TypeError(r);
+var v = (n) => {
+  throw TypeError(n);
 };
-var C = (r, n, t) => n in r ? E(r, n, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[n] = t;
-var o = (r, n, t) => C(r, typeof n != "symbol" ? n + "" : n, t), M = (r, n, t) => n.has(r) || v("Cannot " + t);
-var x = (r, n, t) => n.has(r) ? v("Cannot add the same private member more than once") : n instanceof WeakSet ? n.add(r) : n.set(r, t);
-var s = (r, n, t) => (M(r, n, "access private method"), t);
+var C = (n, r, t) => r in n ? E(n, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[r] = t;
+var o = (n, r, t) => C(n, typeof r != "symbol" ? r + "" : r, t), M = (n, r, t) => r.has(n) || v("Cannot " + t);
+var x = (n, r, t) => r.has(n) ? v("Cannot add the same private member more than once") : r instanceof WeakSet ? r.add(n) : r.set(n, t);
+var s = (n, r, t) => (M(n, r, "access private method"), t);
 class O extends HTMLElement {
   constructor() {
     super();
   }
   connectedCallback() {
     this.classList.add("slide");
-    const n = document.createElement("style");
-    n.textContent = `
+    const r = document.createElement("style");
+    r.textContent = `
     .slide{
       height: 100%;
       flex: 0 0 auto;
       box-sizing: border-box;
       display: block;
     }
-    `, document.head.appendChild(n);
+    `, document.head.appendChild(r);
   }
 }
-function A(r) {
-  if (typeof r != "object" || r === null)
+function A(n) {
+  if (typeof n != "object" || n === null)
     return "invalid value type. Breakpoints should be an object";
-  for (const n in r) {
-    if (isNaN(Number(n)))
+  for (const r in n) {
+    if (isNaN(Number(r)))
       return "Breakpoints should contain keys typeof number";
-    const t = r[n];
+    const t = n[r];
     if (typeof t != "object" || t === null || t.slidesToShow && typeof t.slidesToShow != "number" || t.slidesToScroll && typeof t.slidesToScroll != "number")
       return "invalid value type. Pass an object with keys itemsToShow and itemsToScroll and values typeof number";
   }
@@ -214,8 +214,9 @@ e = new WeakSet(), S = function() {
     }, 50);
   }, 300);
 };
-customElements.define("carousel-component", X);
-customElements.define("slide-component", O);
+(function() {
+  customElements.get("carousel-component") || (customElements.define("carousel-component", X), customElements.define("slide-component", O));
+})();
 export {
   X as CarouselComponent
 };

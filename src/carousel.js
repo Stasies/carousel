@@ -322,5 +322,10 @@ export class CarouselComponent extends HTMLElement {
         this.currentIndex = index + Math.floor(this.slidesToShow);
     }
 }
-customElements.define("carousel-component", CarouselComponent);
-customElements.define("slide-component", SlideComponent);
+// customElements.define("carousel-component", CarouselComponent);
+(function registerWebComponent() {
+    if (!customElements.get("carousel-component")) {
+        customElements.define("carousel-component", CarouselComponent);
+        customElements.define("slide-component", SlideComponent);
+    }
+})();

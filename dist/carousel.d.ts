@@ -1,4 +1,5 @@
 import "./styles.css";
+import { SlideComponent } from "./slide";
 export declare class CarouselComponent extends HTMLElement {
     #private;
     slides: Element[] | null;
@@ -50,5 +51,6 @@ export declare class CarouselComponent extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         "carousel-component": CarouselComponent;
+        "slide-component": SlideComponent;
     }
 }
