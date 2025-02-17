@@ -5,7 +5,6 @@ export declare class CarouselComponent extends HTMLElement {
     slides: Element[] | null;
     initialSlides: Element[];
     rendered: boolean;
-    config: any;
     autoplay: false | number;
     wraparound: boolean;
     _currentIndex: number;
@@ -13,16 +12,16 @@ export declare class CarouselComponent extends HTMLElement {
         slidesToShow: number;
         slidesToScroll: number;
     }>;
-    maxIndex: number;
-    slidesToShow: number;
-    slideCount: number;
-    slidesToScroll: number;
-    slideWidth: number;
-    isDragging: boolean;
-    startX: number;
-    dragOffset: number;
-    interval: ReturnType<typeof setInterval> | null;
-    constructor(...config: any);
+    private maxIndex;
+    private slidesToShow;
+    private slideCount;
+    private slidesToScroll;
+    private slideWidth;
+    private isDragging;
+    private startX;
+    private dragOffset;
+    private interval;
+    constructor();
     static get observedAttributes(): string[];
     attributeChangedCallback(name: string, oldValue: string, newValue: string): void;
     set breakpoints(value: Record<number, {

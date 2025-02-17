@@ -3,17 +3,17 @@ export class SlideComponent extends HTMLElement {
     super();
   }
   connectedCallback() {
-    this.render();
-  }
-  render() {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("slide");
+    this.classList.add("slide");
 
-    let children = Array.from(this.children);
-    children.forEach((slide) => {
-      wrapper.appendChild(slide.cloneNode(true));
-    });
-
-    this.replaceWith(wrapper);
+    const style = document.createElement("style");
+    style.textContent = `
+    .slide{
+      height: 100%;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      display: block;
+    }
+    `;
+    document.head.appendChild(style);
   }
 }
