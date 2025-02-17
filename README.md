@@ -21,7 +21,7 @@ npm install @stasies/js-carousel
 ### Basic Example
 
 ```html
-<carousel-component autoplay="3000" wraparound="true">
+<carousel-component autoplay="3000" wraparound="true" gap="8">
   <slide-component>Slide 1</slide-component>
   <slide-component>Slide 2</slide-component>
   <slide-component>Slide 3</slide-component>
@@ -35,6 +35,7 @@ npm install @stasies/js-carousel
 | `autoplay`    | `false` \| `number` | `false`                                     | `false` disables autoplay, a number sets autoplay interval in ms |
 | `wrapAround`  | `boolean`           | `true`                                      | Enables infinite loop                                            |
 | `breakpoints` | `object`            | `{0: {slidesToShow: 1, slidesToScroll: 1}}` | Defines responsive breakpoints where the key is the screen width |
+| `gap`         | `number`            | `10`                                        | Sets gaps between slides (in px)                                 |
 
 ### JavaScript Usage
 
@@ -53,19 +54,6 @@ carousel.breakpoints = {
 carousel.next(); // switch to the next slide
 carousel.prev(); //switch to the previous slide
 carousel.jump(index); //jump to the slide with index
-```
-
-## 🎨 Styling
-
-You can style the carousel using CSS:
-
-```css
-carousel-component {
-  display: block;
-  width: 100%;
-  max-width: 800px;
-  margin: auto;
-}
 ```
 
 ## 📄 License
