@@ -1,8 +1,11 @@
 {
   "name": "@stasies/js-carousel",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A lightweight js-carousel component",
-  "files": ["dist", "dist/js-carousel.css"],
+  "files": [
+    "dist",
+    "dist/js-carousel.css"
+  ],
   "main": "dist/carousel.umd.js",
   "module": "dist/carousel.es.js",
   "type": "module",
@@ -27,7 +30,11 @@
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
-   "keywords": ["carousel", "js", "web components"],
-    "author": "Anastasia Vyatkina",
-    "license": "MIT"
+  "keywords": [
+    "carousel",
+    "js",
+    "web components"
+  ],
+  "author": "Anastasia Vyatkina",
+  "license": "MIT"
 }

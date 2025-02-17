@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <script type="module" src="./src/carousel.ts"></script>
-        <script type="module" src="./src/testing.ts"></script>
-        <script type="module" src="./src/slide.ts"></script>
-        <link rel="stylesheet" href="./src/styles.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="module" src="./src/carousel.ts"></script>
+    <script type="module" src="./src/testing.ts"></script>
+    <script type="module" src="./src/slide.ts"></script>
+    <link rel="stylesheet" href="./src/styles.css">
+</head>
 
-    <body>
-        <carousel-component id="carousel" autoplay="false" wraparound="true">
-            <slide-component>
-                <div class="big">1</div>
-                <div>2</div>
-                <div>3</div>
-            </slide-component>
-            <slide-component>2</slide-component>
-            <slide-component>3</slide-component>
-            <slide-component>4</slide-component>
-            <slide-component>5</slide-component>
-        </carousel-component>
-        <button id="button">next</button>
-    </body>
+<body>
+    <carousel-component id="carousel" autoplay="false" wraparound="false">
+        <slide-component>
+            <div class="big">1</div>
+            <div>2</div>
+            <div>3</div>
+        </slide-component>
+        <slide-component>2</slide-component>
+        <slide-component>3</slide-component>
+        <slide-component>4</slide-component>
+        <slide-component>5</slide-component>
+    </carousel-component>
+    <button id="button">next</button>
+</body>
 
 </html>

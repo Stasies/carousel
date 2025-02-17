@@ -46,11 +46,13 @@ export class CarouselComponent extends HTMLElement {
   #setupStyles() {
     const style = document.createElement("style");
     style.textContent = `
+    carousel-component{
+      display: block;
+    }
     .carousel {
-      border: 1px solid grey;
       overflow: hidden;
       display: flex;
-      height: 400px;
+      height: 100%;
     }
     .carousel-track {
       display: flex;
@@ -58,6 +60,7 @@ export class CarouselComponent extends HTMLElement {
       width: 100%;
       height: 100%;
       user-select: none;
+      gap: 8px;
     }
     .transition {
       transition: transform 0.3s ease;
