@@ -48,6 +48,8 @@ export class CarouselComponent extends HTMLElement {
     style.textContent = `
     carousel-component{
       display: block;
+      height: 100%;
+      width: 100%;
     }
     .carousel {
       overflow: hidden;
@@ -60,7 +62,6 @@ export class CarouselComponent extends HTMLElement {
       width: 100%;
       height: 100%;
       user-select: none;
-      gap: 8px;
     }
     .transition {
       transition: transform 0.3s ease;
