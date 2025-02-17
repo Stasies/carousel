@@ -15,6 +15,9 @@
 .transition {
   transition: transform 0.3s ease;
 }
+.hidden {
+  background: grey;
+}
 
 .slide {
   height: 100%;

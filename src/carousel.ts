@@ -63,6 +63,7 @@ export class CarouselComponent extends HTMLElement {
       width: 100%;
       height: 100%;
       user-select: none;
+      gap: ${this.gap}px
     }
     .transition {
       transition: transform 0.3s ease;
@@ -84,6 +85,9 @@ export class CarouselComponent extends HTMLElement {
         this.wraparound = newValue.match(/true|false/)
           ? JSON.parse(newValue)
           : false;
+        break;
+      case "gap":
+        this.gap = +newValue || 0;
         break;
     }
   }
@@ -128,7 +132,6 @@ export class CarouselComponent extends HTMLElement {
     this.#removeEventListeners();
   }
   render() {
-    // if (this.querySelector(".carousel")) return;
     this.innerHTML = "";
 
     const wrapper = document.createElement("div");
@@ -191,9 +194,12 @@ export class CarouselComponent extends HTMLElement {
     }
   }
   #updateResponsiveSettings() {
-    this.slideWidth = 100 / this.slidesToShow;
+    this.slideWidth =
+      (this.clientWidth - this.gap * (this.slidesToShow - 1)) /
+      this.slidesToShow;
+
     this.slides?.forEach((slide) => {
-      (slide as any).setAttribute("style", `width: ${this.slideWidth}%`);
+      (slide as HTMLDivElement).style.width = `${this.slideWidth}px`;
     });
   }
   #setupIndex() {
@@ -244,16 +250,16 @@ export class CarouselComponent extends HTMLElement {
     }
     const track = this.querySelector(".carousel-track") as HTMLElement;
     if (track) {
-      track.style.transform = `translateX(calc(-${
-        this.currentIndex * this.slideWidth
-      }% + ${this.dragOffset}px))`;
+      track.style.transform = `translateX(-${
+        this.currentIndex * (this.slideWidth + this.gap) - this.dragOffset
+      }px `;
     }
   }
   #onDragEnd() {
     if (!this.isDragging) return;
     this.isDragging = false;
 
-    const threshold = this.slideWidth / 3;
+    const threshold = 50;
     if (Math.abs(this.dragOffset) > threshold) {
       if (this.dragOffset < 0) {
         this.next();
@@ -273,8 +279,8 @@ export class CarouselComponent extends HTMLElement {
   #handleTranslate() {
     let track = this.querySelector(".carousel-track") as HTMLDivElement;
     track.style.transform = `translateX(-${
-      this.currentIndex * this.slideWidth
-    }%)`;
+      this.currentIndex * (this.slideWidth + this.gap)
+    }px)`;
   }
   #updateSlideClasses() {
     this.slides?.forEach((slide, index) => {
@@ -288,7 +294,7 @@ export class CarouselComponent extends HTMLElement {
         slide.classList.add("next");
       }
       if (
-        index < this.currentIndex - 1 ||
+        index < this.currentIndex ||
         index > this.currentIndex + this.slidesToShow
       ) {
         slide.classList.add("hidden");
