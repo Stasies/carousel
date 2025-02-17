@@ -21,7 +21,7 @@ npm install my-lit-carousel
 ### Basic Example
 
 ```html
-<carousel-component autoplay="false">
+<carousel-component autoplay="false" wraparound="true">
   <slide-component>Slide 1</slide-component>
   <slide-component>Slide 2</slide-component>
   <slide-component>Slide 3</slide-component>
@@ -40,6 +40,16 @@ npm install my-lit-carousel
 
 ```javascript
 const carousel = document.querySelector("carousel-component");
+carousel.breakpoints = {
+  1600: {
+    slidesToShow: 3,
+    slidesToScroll: 1,
+  },
+  0: {
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  },
+};
 carousel.next(); // switch to the next slide
 carousel.prev(); //switch to the previous slide
 carousel.jump(index); //jump to the slide with index
