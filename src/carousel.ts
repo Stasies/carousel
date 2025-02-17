@@ -1,12 +1,11 @@
 import "./styles.css";
 import { SlideComponent } from "./slide";
-import { ConfigValidator, isInvalidBreakpoints } from "./validator";
+import { isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
-  private observer: MutationObserver | null = null;
   slides: Element[] | null;
+  gap: number;
   initialSlides: Element[];
   rendered: boolean;
-  config: any;
   autoplay: false | number;
   wraparound: boolean;
   _currentIndex: number;
@@ -14,17 +13,18 @@ export class CarouselComponent extends HTMLElement {
     number,
     { slidesToShow: number; slidesToScroll: number }
   >;
-  maxIndex: number;
-  slidesToShow: number;
-  slideCount: number;
-  slidesToScroll: number;
-  slideWidth: number;
-  isDragging: boolean;
-  startX: number;
-  dragOffset: number;
-  interval: ReturnType<typeof setInterval> | null;
+  private observer: MutationObserver | null = null;
+  private maxIndex: number;
+  private slidesToShow: number;
+  private slideCount: number;
+  private slidesToScroll: number;
+  private slideWidth: number;
+  private isDragging: boolean;
+  private startX: number;
+  private dragOffset: number;
+  private interval: ReturnType<typeof setInterval> | null;
 
-  constructor(...config: any) {
+  constructor() {
     super();
     this.initialSlides = [];
     this.rendered = false;
@@ -33,6 +33,7 @@ export class CarouselComponent extends HTMLElement {
     this.wraparound = false;
     this.slides = [];
     this.interval = null;
+    this.gap = 0;
     this.slideWidth = 100;
     this.slideCount = 0;
     this._currentIndex = 0;
@@ -66,20 +67,14 @@ export class CarouselComponent extends HTMLElement {
     .transition {
       transition: transform 0.3s ease;
     }
-    .slide{
-      height: 100%;
-      flex: 0 0 auto;
-      box-sizing: border-box;
-    }
     `;
     document.head.appendChild(style);
   }
 
   static get observedAttributes() {
-    return ["autoplay", "wraparound", "breakpoints"];
+    return ["autoplay", "wraparound", "breakpoints", "gap"];
   }
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
     switch (name) {
       case "autoplay":
         this.autoplay = parseInt(newValue, 10) || false;
@@ -116,10 +111,8 @@ export class CarouselComponent extends HTMLElement {
     this._currentIndex = Math.min(Math.max(value, 0), this.maxIndex);
     this.#handleTranslate();
     this.#updateSlideClasses();
-    console.log(this.currentIndex);
   }
   #initializeCarousel() {
-    console.log("initialising");
     this.#setupSlides();
     this.render();
     this.#updateResponsiveSettings();
@@ -168,6 +161,7 @@ export class CarouselComponent extends HTMLElement {
   }
   observeSlides() {
     const callback: MutationCallback = (mutationsList, observer) => {
+      this.observer?.disconnect();
       for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
           mutation.addedNodes.forEach((node: Node) => {
@@ -347,5 +341,5 @@ export class CarouselComponent extends HTMLElement {
   }
 }
 
-customElements.define("slide-component", SlideComponent);
 customElements.define("carousel-component", CarouselComponent);
+customElements.define("slide-component", SlideComponent);
