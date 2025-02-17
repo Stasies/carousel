@@ -1,42 +1,47 @@
-import "./styles.css"
-import { SlideComponent } from "./slide"
-import { ConfigValidator, isInvalidBreakpoints } from "./validator"
+import "./styles.css";
+import { SlideComponent } from "./slide";
+import { ConfigValidator, isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
   private observer: MutationObserver | null = null;
-  slides: Element[] | null
-  rendered: boolean
-  config: any
-  autoplay: false | number
-  wraparound: boolean
-  _currentIndex: number
-  _breakpoints: Record<number, { slidesToShow: number; slidesToScroll: number }>
-  maxIndex: number
-  slidesToShow: number
-  slideCount: number
-  slidesToScroll: number
-  slideWidth: number
-  isDragging: boolean
-  startX: number
-  dragOffset: number
-  interval: ReturnType<typeof setInterval> | null
+  slides: Element[] | null;
+  initialSlides: Element[];
+  rendered: boolean;
+  config: any;
+  autoplay: false | number;
+  wraparound: boolean;
+  _currentIndex: number;
+  _breakpoints: Record<
+    number,
+    { slidesToShow: number; slidesToScroll: number }
+  >;
+  maxIndex: number;
+  slidesToShow: number;
+  slideCount: number;
+  slidesToScroll: number;
+  slideWidth: number;
+  isDragging: boolean;
+  startX: number;
+  dragOffset: number;
+  interval: ReturnType<typeof setInterval> | null;
 
   constructor(...config: any) {
     super();
-    this.rendered = false
-    this._breakpoints = {}
-    this.autoplay = false
-    this.wraparound = false
-    this.slides = []
-    this.interval = null
-    this.slideWidth = 100
-    this.slideCount = 0
-    this._currentIndex = 0
-    this.maxIndex = 0
-    this.slidesToShow = 1
-    this.slidesToScroll = 1
-    this.isDragging = false
-    this.startX = 0
-    this.dragOffset = 0
+    this.initialSlides = [];
+    this.rendered = false;
+    this._breakpoints = {};
+    this.autoplay = false;
+    this.wraparound = false;
+    this.slides = [];
+    this.interval = null;
+    this.slideWidth = 100;
+    this.slideCount = 0;
+    this._currentIndex = 0;
+    this.maxIndex = 0;
+    this.slidesToShow = 1;
+    this.slidesToScroll = 1;
+    this.isDragging = false;
+    this.startX = 0;
+    this.dragOffset = 0;
   }
   #setupStyles() {
     const style = document.createElement("style");
@@ -67,21 +72,25 @@ export class CarouselComponent extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['autoplay', 'wraparound', 'breakpoints'];
+    return ["autoplay", "wraparound", "breakpoints"];
   }
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
     switch (name) {
-      case 'autoplay':
+      case "autoplay":
         this.autoplay = parseInt(newValue, 10) || false;
-        this.startAutoPlay()
+        this.startAutoPlay();
         break;
-      case 'wraparound':
-        this.wraparound = newValue.match(/true|false/) ? JSON.parse(newValue) : false;
+      case "wraparound":
+        this.wraparound = newValue.match(/true|false/)
+          ? JSON.parse(newValue)
+          : false;
         break;
     }
   }
-  set breakpoints(value: Record<number, { slidesToShow: number; slidesToScroll: number }>) {
+  set breakpoints(
+    value: Record<number, { slidesToShow: number; slidesToScroll: number }>
+  ) {
     if (!isInvalidBreakpoints(value)) {
       this._breakpoints = value;
     }
@@ -93,37 +102,37 @@ export class CarouselComponent extends HTMLElement {
   }
 
   updateBreakpoints() {
-    this.#setResponsiveDisplayOptions()
-    this.#updateResponsiveSettings()
+    this.#setResponsiveDisplayOptions();
+    this.#initializeCarousel();
   }
   get currentIndex() {
-    return this._currentIndex
+    return this._currentIndex;
   }
   set currentIndex(value: number) {
     this._currentIndex = Math.min(Math.max(value, 0), this.maxIndex);
-    this.#handleTranslate()
-    this.#updateSlideClasses()
+    this.#handleTranslate();
+    this.#updateSlideClasses();
+    console.log(this.currentIndex);
   }
   #initializeCarousel() {
-    this.#setupSlides()
+    console.log("initialising");
+    this.#setupSlides();
     this.render();
     this.#updateResponsiveSettings();
-    this.#setupIndex()
+    this.#setupIndex();
   }
   connectedCallback() {
-    this.#setupStyles()
+    this.#setupStyles();
     this.observeSlides();
-    this.#initializeCarousel()
-    this.#setResponsiveDisplayOptions() //amount of slides visible & scolled
+    this.#initializeCarousel();
     this.#setupEventListeners();
   }
   disconnectedCallback() {
-    this.#removeEventListeners()
+    this.#removeEventListeners();
   }
   render() {
-    if (this.querySelector(".carousel")) return;
-
-    this.innerHTML = ""
+    // if (this.querySelector(".carousel")) return;
+    this.innerHTML = "";
 
     const wrapper = document.createElement("div");
     wrapper.classList.add("carousel");
@@ -133,41 +142,66 @@ export class CarouselComponent extends HTMLElement {
 
     this.slides?.forEach((node) => track.appendChild(node));
     wrapper.appendChild(track);
-    this.appendChild(wrapper)
+    this.appendChild(wrapper);
   }
   #setupSlides() {
-    const track = this.querySelector('.carousel-track')
-    let initialSlides = Array.from(track ? track.children : this.children);
-    this.slideCount = initialSlides.length
+    const track = this.querySelector(".carousel-track");
+    if (!track) {
+      this.initialSlides = Array.from(this.children);
+    }
+    this.slideCount = this.initialSlides.length;
 
-    const firstClones = initialSlides.slice(0, Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
-    const lastClones = initialSlides.slice(-Math.floor(this.slidesToShow)).map((el) => el.cloneNode(true)) as Element[];
+    const firstClones = this.initialSlides
+      .slice(0, Math.floor(this.slidesToShow))
+      .map((el) => el.cloneNode(true)) as Element[];
+    const lastClones = this.initialSlides
+      .slice(-Math.floor(this.slidesToShow))
+      .map((el) => el.cloneNode(true)) as Element[];
 
-    this.slides = this.wraparound ? [...lastClones, ...initialSlides, ...firstClones] : initialSlides;
+    this.slides = this.wraparound
+      ? [...lastClones, ...this.initialSlides, ...firstClones]
+      : this.initialSlides;
   }
   observeSlides() {
-    this.observer = new MutationObserver(() => this.#initializeCarousel());
+    const callback: MutationCallback = (mutationsList, observer) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach((node: Node) => {
+            if (
+              (node as Element).classList &&
+              (node as Element).classList.contains("slide")
+            ) {
+              this.initialSlides.push(node as Element);
+              this.#initializeCarousel();
+            }
+          });
+        }
+      }
+    };
+    this.observer = new MutationObserver(callback);
     this.observer.observe(this, { childList: true, subtree: true });
   }
   #setResponsiveDisplayOptions() {
-    console.log(this.breakpoints)
     for (let point in this.breakpoints) {
       if (window.innerWidth >= +point) {
         this.slidesToShow = this.breakpoints[+point].slidesToShow || 1;
-        this.slidesToScroll = this.breakpoints[+point].slidesToScroll || this.breakpoints[+point].slidesToShow || 1;
+        this.slidesToScroll =
+          this.breakpoints[+point].slidesToScroll ||
+          this.breakpoints[+point].slidesToShow ||
+          1;
       }
     }
   }
   #updateResponsiveSettings() {
-    console.log(this.slidesToShow)
     this.slideWidth = 100 / this.slidesToShow;
-    console.log("WIDTH", this.slideWidth)
     this.slides?.forEach((slide) => {
       (slide as any).setAttribute("style", `width: ${this.slideWidth}%`);
     });
   }
   #setupIndex() {
-    this.maxIndex = this.wraparound ? this.slideCount : Math.max(this.slideCount - this.slidesToShow, 0);
+    this.maxIndex = this.wraparound
+      ? this.slideCount
+      : Math.max(this.slideCount - this.slidesToShow, 0);
     this.currentIndex = this.wraparound ? Math.floor(this.slidesToShow) : 0;
   }
   #setupEventListeners() {
@@ -180,7 +214,7 @@ export class CarouselComponent extends HTMLElement {
     this.addEventListener("touchend", this.#onDragEnd);
     window.addEventListener("resize", () => this.updateBreakpoints());
 
-    this.startAutoPlay()
+    this.startAutoPlay();
     this.addEventListener("mouseenter", () => this.stopAutoPlay());
     this.addEventListener("mouseleave", () => this.startAutoPlay());
   }
@@ -195,7 +229,7 @@ export class CarouselComponent extends HTMLElement {
   }
   #onDragStart(e: MouseEvent | TouchEvent) {
     this.stopAutoPlay();
-    this.slidesToScroll = 1
+    this.slidesToScroll = 1;
     this.isDragging = true;
     this.startX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
     this.dragOffset = 0;
@@ -204,12 +238,17 @@ export class CarouselComponent extends HTMLElement {
     if (!this.isDragging) return;
     const currentX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
     this.dragOffset = currentX - this.startX;
-    if (this.currentIndex >= this.maxIndex && this.dragOffset < 0 || this.currentIndex <= 0 && this.dragOffset > 0) {
-      this.dragOffset = 0
+    if (
+      (this.currentIndex >= this.maxIndex && this.dragOffset < 0) ||
+      (this.currentIndex <= 0 && this.dragOffset > 0)
+    ) {
+      this.dragOffset = 0;
     }
     const track = this.querySelector(".carousel-track") as HTMLElement;
     if (track) {
-      track.style.transform = `translateX(calc(-${this.currentIndex * this.slideWidth}% + ${this.dragOffset}px))`;
+      track.style.transform = `translateX(calc(-${
+        this.currentIndex * this.slideWidth
+      }% + ${this.dragOffset}px))`;
     }
   }
   #onDragEnd() {
@@ -234,69 +273,73 @@ export class CarouselComponent extends HTMLElement {
     clearInterval(this.interval!);
   }
   #handleTranslate() {
-    let track = this.querySelector('.carousel-track') as HTMLDivElement
-    track.style.transform = `translateX(-${this.currentIndex * this.slideWidth}%)`
+    let track = this.querySelector(".carousel-track") as HTMLDivElement;
+    track.style.transform = `translateX(-${
+      this.currentIndex * this.slideWidth
+    }%)`;
   }
   #updateSlideClasses() {
     this.slides?.forEach((slide, index) => {
       if (!(slide instanceof HTMLElement)) return;
-      slide.classList.remove('prev', 'current', 'next', 'hidden')
+      slide.classList.remove("prev", "current", "next", "hidden");
       if (index === this.currentIndex) {
-        slide.classList.add("current")
+        slide.classList.add("current");
       } else if (index === this.currentIndex - 1) {
-        slide.classList.add("prev")
+        slide.classList.add("prev");
       } else if (index === this.currentIndex + 1) {
-        slide.classList.add("next")
+        slide.classList.add("next");
       }
-      if (index < this.currentIndex - 1 || index > this.currentIndex + this.slidesToShow) {
-        slide.classList.add('hidden')
+      if (
+        index < this.currentIndex - 1 ||
+        index > this.currentIndex + this.slidesToShow
+      ) {
+        slide.classList.add("hidden");
       }
     });
   }
   handleNonInfiniteScroll(step: number) {
-    this.currentIndex += step
+    this.currentIndex += step;
     if (this.maxIndex == this.currentIndex) {
-      this.stopAutoPlay()
+      this.stopAutoPlay();
     }
   }
   #resetScroll(indexVal: number) {
-    let track = this.querySelector('.carousel-track')
+    let track = this.querySelector(".carousel-track");
     setTimeout(() => {
-      track?.classList.remove('transition')
+      track?.classList.remove("transition");
       this.currentIndex = indexVal;
       setTimeout(() => {
-        track?.classList.add('transition')
+        track?.classList.add("transition");
       }, 50);
     }, 300);
   }
   prev() {
     if (!this.wraparound) {
-      this.handleNonInfiniteScroll(-this.slidesToShow)
-      return
+      this.handleNonInfiniteScroll(-this.slidesToScroll);
+      return;
     }
-    const maxLeftScroll = this.slidesToShow
-    if (this.currentIndex <= maxLeftScroll) {
+    if (this.currentIndex <= 1) {
       this.currentIndex -= this.slidesToScroll;
-      this.#resetScroll(this.currentIndex + this.slideCount)
+      this.#resetScroll(this.currentIndex + this.slideCount);
     } else {
       this.currentIndex -= this.slidesToScroll;
     }
   }
   next() {
     if (!this.wraparound) {
-      this.handleNonInfiniteScroll(this.slidesToShow)
-      return
+      this.handleNonInfiniteScroll(this.slidesToScroll);
+      return;
     }
-    const maxRightScroll = this.slideCount - this.slidesToScroll
+    const maxRightScroll = this.slideCount - this.slidesToScroll;
     if (this.currentIndex >= maxRightScroll) {
       this.currentIndex += this.slidesToScroll;
-      this.#resetScroll(this.currentIndex - this.slideCount)
+      this.#resetScroll(this.currentIndex - this.slideCount);
     } else {
       this.currentIndex += this.slidesToScroll;
     }
   }
   jump(index: number) {
-    this.currentIndex = index + Math.floor(this.slidesToShow)
+    this.currentIndex = index + Math.floor(this.slidesToShow);
   }
 }
 
