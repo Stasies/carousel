@@ -18,6 +18,16 @@ npm install @stasies/js-carousel
 
 ## 🚀 Usage
 
+### Attributes
+
+| Attribute      | Type                | Default                                     | Description                                                      |
+| -------------- | ------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
+| `autoplay`     | `false` \| `number` | `false`                                     | `false` disables autoplay, a number sets autoplay interval in ms |
+| `wrapAround`   | `boolean`           | `true`                                      | Enables infinite loop                                            |
+| `breakpoints`  | `object`            | `{0: {slidesToShow: 1, slidesToScroll: 1}}` | Defines responsive breakpoints where the key is the screen width |
+| `gap`          | `number`            | `0`                                         | Sets gaps between slides (in px)                                 |
+| `pauseonhover` | `boolean`           | `true`                                      | `true` stops autoplay on hover                                   |
+
 ### Basic Example
 
 ```html
@@ -32,16 +42,6 @@ npm install @stasies/js-carousel
   <slide-component>Slide 3</slide-component>
 </carousel-component>
 ```
-
-### Attributes
-
-| Attribute      | Type                | Default                                     | Description                                                      |
-| -------------- | ------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
-| `autoplay`     | `false` \| `number` | `false`                                     | `false` disables autoplay, a number sets autoplay interval in ms |
-| `wrapAround`   | `boolean`           | `true`                                      | Enables infinite loop                                            |
-| `breakpoints`  | `object`            | `{0: {slidesToShow: 1, slidesToScroll: 1}}` | Defines responsive breakpoints where the key is the screen width |
-| `gap`          | `number`            | `0`                                         | Sets gaps between slides (in px)                                 |
-| `pauseonhover` | `boolean`           | `true`                                      | `true` stops autoplay on hover                                   |
 
 ### JavaScript Usage
 
@@ -62,7 +62,7 @@ carousel.prev(); //switch to the previous slide
 carousel.jump(index); //jump to the slide with index
 ```
 
-### Next (React) Example
+## Next (React) Example
 
 ```javascript
 "use client";
@@ -71,6 +71,7 @@ import { useEffect, useRef } from "react";
 
 export default function Carousel() {
   const carousel = useRef();
+
   useEffect(() => {
     carousel.current.breakpoints = {
       1200: {
@@ -83,6 +84,7 @@ export default function Carousel() {
       },
     };
   });
+
   return (
     <carousel-component
       ref={carousel}
@@ -100,9 +102,9 @@ export default function Carousel() {
 }
 ```
 
-### Nuxt (Vue) Example
+## Nuxt (Vue) Example
 
-```javascript
+```html
 <template>
   <div class="carousel__wrapper">
     <carousel-component ref="carousel" :wraparound="true" :autoplay="false">
@@ -118,7 +120,9 @@ export default function Carousel() {
 
 ```javascript
 import "@stasies/js-carousel";
+
 const carousel = ref();
+
 onMounted(() => {
   carousel.value.breakpoints = {
     0: {
