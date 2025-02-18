@@ -4,7 +4,6 @@ import { isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
   slides: Element[] | null;
   gap: number;
-  rendered: boolean;
   autoplay: false | number;
   wraparound: boolean;
   pauseonhover: boolean
@@ -28,7 +27,6 @@ export class CarouselComponent extends HTMLElement {
   constructor() {
     super();
     this.initialSlides = [];
-    this.rendered = false;
     this._breakpoints = {};
     this.autoplay = false;
     this.pauseonhover = true

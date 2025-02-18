@@ -76,7 +76,6 @@ export class CarouselComponent extends HTMLElement {
         switch (name) {
             case "autoplay":
                 this.autoplay = parseInt(newValue, 10) || false;
-                this.startAutoPlay();
                 break;
             case "wraparound":
                 this.wraparound = newValue.match(/true|false/)
@@ -146,10 +145,10 @@ export class CarouselComponent extends HTMLElement {
         }
         this.slideCount = this.initialSlides.length;
         const firstClones = this.initialSlides
-            .slice(0, Math.floor(this.slidesToScroll))
+            .slice(0, Math.floor(this.slidesToShow))
             .map((el) => el.cloneNode(true));
         const lastClones = this.initialSlides
-            .slice(-Math.floor(this.slidesToScroll))
+            .slice(-Math.floor(this.slidesToShow))
             .map((el) => el.cloneNode(true));
         this.slides = this.wraparound
             ? [...lastClones, ...this.initialSlides, ...firstClones]
@@ -196,7 +195,7 @@ export class CarouselComponent extends HTMLElement {
         this.maxIndex = this.wraparound
             ? (this.slides?.length || this.slideCount)
             : Math.max(this.slideCount - this.slidesToShow, 0);
-        this.currentIndex = this.wraparound ? Math.floor(this.slidesToScroll) : 0;
+        this.currentIndex = this.wraparound ? Math.floor(this.slidesToShow) : 0;
     }
     #setupEventListeners() {
         this.addEventListener("mousedown", this.#onDragStart);
@@ -207,6 +206,9 @@ export class CarouselComponent extends HTMLElement {
         this.addEventListener("mouseleave", this.#onDragEnd);
         this.addEventListener("touchend", this.#onDragEnd);
         window.addEventListener("resize", () => this.updateBreakpoints());
+        if (this.autoplay) {
+            this.startAutoPlay();
+        }
         if (this.pauseonhover) {
             this.addEventListener("mouseenter", () => this.stopAutoPlay());
             this.addEventListener("mouseleave", () => this.startAutoPlay());
@@ -259,6 +261,9 @@ export class CarouselComponent extends HTMLElement {
     startAutoPlay() {
         if (this.autoplay) {
             this.interval = setInterval(() => this.next(), this.autoplay);
+        }
+        else {
+            this.stopAutoPlay();
         }
     }
     stopAutoPlay() {

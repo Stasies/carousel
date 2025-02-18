@@ -1,3 +1,6 @@
+carousel-component{
+  height: 500px !important;
+}
 .carousel {
   overflow: hidden;
   display: flex;

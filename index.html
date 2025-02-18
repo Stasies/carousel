@@ -12,15 +12,25 @@
     </head>
 
     <body>
-        <carousel-component id="carousel" autoplay="2000" wraparound="true"
-            pauseonhover="false">
-            <slide-component>slide 1</slide-component>
-            <slide-component>slide 2</slide-component>
-            <slide-component>slide 3</slide-component>
-            <slide-component>slide 4</slide-component>
-            <slide-component>slide 5</slide-component>
-        </carousel-component>
-        <button id="button">next</button>
+        <div>
+            <carousel-component id="carousel"
+                pauseonhover="false">
+                <slide-component>slide 1</slide-component>
+                <slide-component>slide 2</slide-component>
+                <slide-component>slide 3</slide-component>
+                <slide-component>slide 4</slide-component>
+                <slide-component>slide 5</slide-component>
+            </carousel-component>
+            <button id="prev" data-test="prev">prev</button>
+            <button id="next" data-test="next">next</button>
+        </div>
+        <div>
+            <carousel-component id="infiniteCarousel" autoplay="1000"
+                wraparound="true">
+                <slide-component>slide 1</slide-component>
+                <slide-component>slide 2</slide-component>
+            </carousel-component>
+        </div>
     </body>
 
 </html>
