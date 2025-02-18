@@ -4,10 +4,11 @@ import { isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
     slides;
     gap;
-    initialSlides;
     rendered;
     autoplay;
     wraparound;
+    pauseonhover;
+    initialSlides;
     _currentIndex;
     _breakpoints;
     observer = null;
@@ -26,6 +27,7 @@ export class CarouselComponent extends HTMLElement {
         this.rendered = false;
         this._breakpoints = {};
         this.autoplay = false;
+        this.pauseonhover = true;
         this.wraparound = false;
         this.slides = [];
         this.interval = null;
@@ -59,6 +61,7 @@ export class CarouselComponent extends HTMLElement {
       width: 100%;
       height: 100%;
       user-select: none;
+      gap: ${this.gap}px
     }
     .transition {
       transition: transform 0.3s ease;
@@ -67,7 +70,7 @@ export class CarouselComponent extends HTMLElement {
         document.head.appendChild(style);
     }
     static get observedAttributes() {
-        return ["autoplay", "wraparound", "breakpoints", "gap"];
+        return ["autoplay", "wraparound", "gap", "pauseonhover"];
     }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
@@ -79,6 +82,14 @@ export class CarouselComponent extends HTMLElement {
                 this.wraparound = newValue.match(/true|false/)
                     ? JSON.parse(newValue)
                     : false;
+                break;
+            case "gap":
+                this.gap = +newValue || 0;
+                break;
+            case "pauseonhover":
+                this.pauseonhover = newValue.match(/true|false/)
+                    ? JSON.parse(newValue)
+                    : true;
                 break;
         }
     }
@@ -119,7 +130,6 @@ export class CarouselComponent extends HTMLElement {
         this.#removeEventListeners();
     }
     render() {
-        // if (this.querySelector(".carousel")) return;
         this.innerHTML = "";
         const wrapper = document.createElement("div");
         wrapper.classList.add("carousel");
@@ -136,10 +146,10 @@ export class CarouselComponent extends HTMLElement {
         }
         this.slideCount = this.initialSlides.length;
         const firstClones = this.initialSlides
-            .slice(0, Math.floor(this.slidesToShow))
+            .slice(0, Math.floor(this.slidesToScroll))
             .map((el) => el.cloneNode(true));
         const lastClones = this.initialSlides
-            .slice(-Math.floor(this.slidesToShow))
+            .slice(-Math.floor(this.slidesToScroll))
             .map((el) => el.cloneNode(true));
         this.slides = this.wraparound
             ? [...lastClones, ...this.initialSlides, ...firstClones]
@@ -175,16 +185,18 @@ export class CarouselComponent extends HTMLElement {
         }
     }
     #updateResponsiveSettings() {
-        this.slideWidth = 100 / this.slidesToShow;
+        this.slideWidth =
+            (this.clientWidth - this.gap * (this.slidesToShow - 1)) /
+                this.slidesToShow;
         this.slides?.forEach((slide) => {
-            slide.setAttribute("style", `width: ${this.slideWidth}%`);
+            slide.style.width = `${this.slideWidth}px`;
         });
     }
     #setupIndex() {
         this.maxIndex = this.wraparound
-            ? this.slideCount
+            ? (this.slides?.length || this.slideCount)
             : Math.max(this.slideCount - this.slidesToShow, 0);
-        this.currentIndex = this.wraparound ? Math.floor(this.slidesToShow) : 0;
+        this.currentIndex = this.wraparound ? Math.floor(this.slidesToScroll) : 0;
     }
     #setupEventListeners() {
         this.addEventListener("mousedown", this.#onDragStart);
@@ -195,9 +207,10 @@ export class CarouselComponent extends HTMLElement {
         this.addEventListener("mouseleave", this.#onDragEnd);
         this.addEventListener("touchend", this.#onDragEnd);
         window.addEventListener("resize", () => this.updateBreakpoints());
-        this.startAutoPlay();
-        this.addEventListener("mouseenter", () => this.stopAutoPlay());
-        this.addEventListener("mouseleave", () => this.startAutoPlay());
+        if (this.pauseonhover) {
+            this.addEventListener("mouseenter", () => this.stopAutoPlay());
+            this.addEventListener("mouseleave", () => this.startAutoPlay());
+        }
     }
     #removeEventListeners() {
         this.removeEventListener("mousedown", this.#onDragStart);
@@ -226,14 +239,14 @@ export class CarouselComponent extends HTMLElement {
         }
         const track = this.querySelector(".carousel-track");
         if (track) {
-            track.style.transform = `translateX(calc(-${this.currentIndex * this.slideWidth}% + ${this.dragOffset}px))`;
+            track.style.transform = `translateX(-${this.currentIndex * (this.slideWidth + this.gap) - this.dragOffset}px `;
         }
     }
     #onDragEnd() {
         if (!this.isDragging)
             return;
         this.isDragging = false;
-        const threshold = this.slideWidth / 3;
+        const threshold = 50;
         if (Math.abs(this.dragOffset) > threshold) {
             if (this.dragOffset < 0) {
                 this.next();
@@ -253,7 +266,7 @@ export class CarouselComponent extends HTMLElement {
     }
     #handleTranslate() {
         let track = this.querySelector(".carousel-track");
-        track.style.transform = `translateX(-${this.currentIndex * this.slideWidth}%)`;
+        track.style.transform = `translateX(-${this.currentIndex * (this.slideWidth + this.gap)}px)`;
     }
     #updateSlideClasses() {
         this.slides?.forEach((slide, index) => {
@@ -269,7 +282,7 @@ export class CarouselComponent extends HTMLElement {
             else if (index === this.currentIndex + 1) {
                 slide.classList.add("next");
             }
-            if (index < this.currentIndex - 1 ||
+            if (index < this.currentIndex ||
                 index > this.currentIndex + this.slidesToShow) {
                 slide.classList.add("hidden");
             }
@@ -322,10 +335,12 @@ export class CarouselComponent extends HTMLElement {
         this.currentIndex = index + Math.floor(this.slidesToShow);
     }
 }
-// customElements.define("carousel-component", CarouselComponent);
-(function registerWebComponent() {
-    if (!customElements.get("carousel-component")) {
-        customElements.define("carousel-component", CarouselComponent);
-        customElements.define("slide-component", SlideComponent);
-    }
-})();
+const globalObject = typeof window !== 'undefined' ? window : global;
+globalObject.HTMLElement = window.HTMLElement;
+globalObject.HTMLDivElement = window.HTMLDivElement;
+if (!customElements.get("carousel-component")) {
+    customElements.define("carousel-component", CarouselComponent);
+}
+if (!customElements.get("slide-component")) {
+    customElements.define("slide-component", SlideComponent);
+}

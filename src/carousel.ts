@@ -78,11 +78,9 @@ export class CarouselComponent extends HTMLElement {
     return ["autoplay", "wraparound", "gap", "pauseonhover"];
   }
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    console.log(name, newValue)
     switch (name) {
       case "autoplay":
         this.autoplay = parseInt(newValue, 10) || false;
-        this.startAutoPlay();
         break;
       case "wraparound":
         this.wraparound = newValue.match(/true|false/)
@@ -113,7 +111,6 @@ export class CarouselComponent extends HTMLElement {
   }
 
   updateBreakpoints() {
-    console.log(this.breakpoints)
     this.#setResponsiveDisplayOptions();
     this.#initializeCarousel();
   }
@@ -182,7 +179,6 @@ export class CarouselComponent extends HTMLElement {
               (node as Element).classList.contains("slide")
             ) {
               this.initialSlides.push(node as Element);
-
               this.#initializeCarousel();
             }
           });
@@ -214,9 +210,10 @@ export class CarouselComponent extends HTMLElement {
   }
   #setupIndex() {
     this.maxIndex = this.wraparound
-      ? this.slideCount
+      ? (this.slides?.length || this.slideCount)
       : Math.max(this.slideCount - this.slidesToShow, 0);
     this.currentIndex = this.wraparound ? Math.floor(this.slidesToShow) : 0;
+
   }
   #setupEventListeners() {
     this.addEventListener("mousedown", this.#onDragStart);
@@ -228,6 +225,9 @@ export class CarouselComponent extends HTMLElement {
     this.addEventListener("touchend", this.#onDragEnd);
     window.addEventListener("resize", () => this.updateBreakpoints());
 
+    if (this.autoplay) {
+      this.startAutoPlay();
+    }
     if (this.pauseonhover) {
       this.addEventListener("mouseenter", () => this.stopAutoPlay());
       this.addEventListener("mouseleave", () => this.startAutoPlay());
@@ -281,6 +281,8 @@ export class CarouselComponent extends HTMLElement {
   startAutoPlay() {
     if (this.autoplay) {
       this.interval = setInterval(() => this.next(), this.autoplay);
+    } else {
+      this.stopAutoPlay()
     }
   }
   stopAutoPlay() {
@@ -362,6 +364,14 @@ declare global {
     "slide-component": SlideComponent;
   }
 }
-customElements.define("carousel-component", CarouselComponent);
-customElements.define("slide-component", SlideComponent);
+const globalObject = typeof window !== 'undefined' ? window : global;
+globalObject.HTMLElement = window.HTMLElement;
+globalObject.HTMLDivElement = window.HTMLDivElement;
+
+if (!customElements.get("carousel-component")) {
+  customElements.define("carousel-component", CarouselComponent);
+}
+if (!customElements.get("slide-component")) {
+  customElements.define("slide-component", SlideComponent);
+}
 

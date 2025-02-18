@@ -100,6 +100,38 @@ export default function Carousel() {
 }
 ```
 
+### Nuxt (Vue) Example
+
+```javascript
+<template>
+  <div class="carousel__wrapper">
+    <carousel-component ref="carousel" :wraparound="true" :autoplay="false">
+      <slide-component> 1 </slide-component>
+      <slide-component> 2 </slide-component>
+      <slide-component> 3 </slide-component>
+    </carousel-component>
+    <button @click="carousel.prev()">prev</button>
+    <button @click="carousel.next()">next</button>
+  </div>
+</template>
+```
+
+<script setup lang="ts">
+import "@stasies/js-carousel";
+const carousel = ref();
+onMounted(() => {
+  carousel.value.breakpoints = {
+    0: {
+      slidesToShow: 1,
+      slidesToScroll: 1,
+    },
+  };
+});
+</script>
+
+```
+
 ## 📄 License
 
 MIT License © 2025 Stasies
+```
