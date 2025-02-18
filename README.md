@@ -116,7 +116,7 @@ export default function Carousel() {
 </template>
 ```
 
-<script setup lang="ts">
+```javascript
 import "@stasies/js-carousel";
 const carousel = ref();
 onMounted(() => {
@@ -127,11 +127,8 @@ onMounted(() => {
     },
   };
 });
-</script>
-
 ```
 
 ## 📄 License
 
 MIT License © 2025 Stasies
-```
