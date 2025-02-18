@@ -7,6 +7,7 @@ export class CarouselComponent extends HTMLElement {
   rendered: boolean;
   autoplay: false | number;
   wraparound: boolean;
+  pauseonhover: boolean
   private initialSlides: Element[];
   private _currentIndex: number;
   private _breakpoints: Record<
@@ -30,6 +31,7 @@ export class CarouselComponent extends HTMLElement {
     this.rendered = false;
     this._breakpoints = {};
     this.autoplay = false;
+    this.pauseonhover = true
     this.wraparound = false;
     this.slides = [];
     this.interval = null;
@@ -73,9 +75,10 @@ export class CarouselComponent extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["autoplay", "wraparound", "gap"];
+    return ["autoplay", "wraparound", "gap", "pauseonhover"];
   }
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    console.log(name, newValue)
     switch (name) {
       case "autoplay":
         this.autoplay = parseInt(newValue, 10) || false;
@@ -89,10 +92,15 @@ export class CarouselComponent extends HTMLElement {
       case "gap":
         this.gap = +newValue || 0;
         break;
+      case "pauseonhover":
+        this.pauseonhover = newValue.match(/true|false/)
+          ? JSON.parse(newValue)
+          : true;
+        break;
     }
   }
   set breakpoints(
-    value: Record<number, { slidesToShow: number; slidesToScroll: number }>
+    value: any
   ) {
     if (!isInvalidBreakpoints(value)) {
       this._breakpoints = value;
@@ -105,6 +113,7 @@ export class CarouselComponent extends HTMLElement {
   }
 
   updateBreakpoints() {
+    console.log(this.breakpoints)
     this.#setResponsiveDisplayOptions();
     this.#initializeCarousel();
   }
@@ -125,8 +134,7 @@ export class CarouselComponent extends HTMLElement {
   connectedCallback() {
     this.#setupStyles();
     this.observeSlides();
-    this.#initializeCarousel();
-    this.updateBreakpoints()
+    this.#initializeCarousel()
     this.#setupEventListeners();
   }
   disconnectedCallback() {
@@ -174,6 +182,7 @@ export class CarouselComponent extends HTMLElement {
               (node as Element).classList.contains("slide")
             ) {
               this.initialSlides.push(node as Element);
+
               this.#initializeCarousel();
             }
           });
@@ -219,9 +228,10 @@ export class CarouselComponent extends HTMLElement {
     this.addEventListener("touchend", this.#onDragEnd);
     window.addEventListener("resize", () => this.updateBreakpoints());
 
-    this.startAutoPlay();
-    this.addEventListener("mouseenter", () => this.stopAutoPlay());
-    this.addEventListener("mouseleave", () => this.startAutoPlay());
+    if (this.pauseonhover) {
+      this.addEventListener("mouseenter", () => this.stopAutoPlay());
+      this.addEventListener("mouseleave", () => this.startAutoPlay());
+    }
   }
   #removeEventListeners() {
     this.removeEventListener("mousedown", this.#onDragStart);
@@ -352,11 +362,6 @@ declare global {
     "slide-component": SlideComponent;
   }
 }
-// customElements.define("carousel-component", CarouselComponent);
+customElements.define("carousel-component", CarouselComponent);
+customElements.define("slide-component", SlideComponent);
 
-(function registerWebComponent() {
-  if (!customElements.get("carousel-component")) {
-    customElements.define("carousel-component", CarouselComponent);
-    customElements.define("slide-component", SlideComponent);
-  }
-})();
