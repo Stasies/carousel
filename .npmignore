@@ -1,3 +1,5 @@
 src/
 node_modules/
 tests/
+testing.ts
+testing.js
