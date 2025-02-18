@@ -4,12 +4,12 @@ import { isInvalidBreakpoints } from "./validator";
 export class CarouselComponent extends HTMLElement {
   slides: Element[] | null;
   gap: number;
-  initialSlides: Element[];
   rendered: boolean;
   autoplay: false | number;
   wraparound: boolean;
-  _currentIndex: number;
-  _breakpoints: Record<
+  private initialSlides: Element[];
+  private _currentIndex: number;
+  private _breakpoints: Record<
     number,
     { slidesToShow: number; slidesToScroll: number }
   >;
@@ -73,7 +73,7 @@ export class CarouselComponent extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["autoplay", "wraparound", "breakpoints", "gap"];
+    return ["autoplay", "wraparound", "gap"];
   }
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     switch (name) {
@@ -126,6 +126,7 @@ export class CarouselComponent extends HTMLElement {
     this.#setupStyles();
     this.observeSlides();
     this.#initializeCarousel();
+    this.updateBreakpoints()
     this.#setupEventListeners();
   }
   disconnectedCallback() {
@@ -250,9 +251,8 @@ export class CarouselComponent extends HTMLElement {
     }
     const track = this.querySelector(".carousel-track") as HTMLElement;
     if (track) {
-      track.style.transform = `translateX(-${
-        this.currentIndex * (this.slideWidth + this.gap) - this.dragOffset
-      }px `;
+      track.style.transform = `translateX(-${this.currentIndex * (this.slideWidth + this.gap) - this.dragOffset
+        }px `;
     }
   }
   #onDragEnd() {
@@ -278,9 +278,8 @@ export class CarouselComponent extends HTMLElement {
   }
   #handleTranslate() {
     let track = this.querySelector(".carousel-track") as HTMLDivElement;
-    track.style.transform = `translateX(-${
-      this.currentIndex * (this.slideWidth + this.gap)
-    }px)`;
+    track.style.transform = `translateX(-${this.currentIndex * (this.slideWidth + this.gap)
+      }px)`;
   }
   #updateSlideClasses() {
     this.slides?.forEach((slide, index) => {
